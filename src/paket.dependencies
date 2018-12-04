@@ -1,0 +1,4 @@
+source https://api.nuget.org/v3/index.json
+storage: none
+nuget TaskBuilder.fs
+nuget Microsoft.Azure.Search
