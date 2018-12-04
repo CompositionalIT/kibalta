@@ -5,6 +5,21 @@ A simple F# wrapper over the .NET Azure Search SDK.
 This is a very, very early proof of concept. Things might not work. Things will be missing.
 However, if you're interested in testing this out, we'd really be interested in your feedback!
 
+## Installation
+Currently we aren't bothering with nuget packages. Simply add the Kibalta github to your paket dependencies file instead:
+
+```
+github CompositionalIT/kibalta src/Kibalta.fs
+```
+
+In your `paket.references`, add the following lines:
+
+```
+TaskBuilder.fs
+Microsoft.Azure.Search
+File: Kibalta.fs
+```
+
 ## Basic Queries
 
 1. First make a simple typed search function.
@@ -155,3 +170,11 @@ let sortedGeoQuery =
         sort [ ByDistance(-0.127758, 51.507351, Descending) ]
     }
 ```
+
+## TO DO
+Lots of things.
+
+* Review and get feedback on the API in general.
+* Support for suggestions
+* Insertion of data
+* Expose more features from the Azure Search SDK.
