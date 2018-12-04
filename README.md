@@ -108,13 +108,14 @@ let asFilterExpr = GeoFilter (-0.127758, 51.507351, Lt, 10.)
 ```
 
 ### Composing filters programmatically
-If you need to *programmatically* combine filters together using AND logic, you can reduce or fold over them. The `DefaultFilter` value in the Filters namespace acts as the "null" filter for folding:
+If you need to *programmatically* combine filters together, you can reduce or fold over them. The `DefaultFilter` value in the Filters namespace acts as the "null" filter for folding:
 
 ```fsharp
 let filters =
     [ where "Age" Gt 21
       where "Name" Eq "Isaac" ]
 
+// AND the list of filters together.
 let filter = filters |> List.fold (+) DefaultFilter
 ```
 
