@@ -17,12 +17,12 @@ type Direction =
 /// Specifies a type of sort to apply.
 type SortColumn =
     | ByField of field: string * Direction
-    | ByDistance of long: float * lat: float * Direction
+    | ByDistance of field: string * long: float * lat: float * Direction
     member this.StringValue =
         match this with
         | ByField(field, dir) -> sprintf "%s %s" field dir.StringValue
-        | ByDistance(long, lat, dir) -> 
-            sprintf "geo.distance(Geo, geography'POINT(%f %f)') %s" long lat dir.StringValue
+        | ByDistance(field, long, lat, dir) -> 
+            sprintf "geo.distance(%s, geography'POINT(%f %f)') %s" field long lat dir.StringValue
 
 module Filters =
     /// Combines two filters together using either AND or OR logic.

@@ -176,13 +176,13 @@ let sortedQuery =
     }
 ```
 
-You can also perform sorting on geo-location distance. This sort normally is performed in conjunction with a `GeoFilter` filter.
+You can also perform sorting on geo-location distance. This sort normally is performed in conjunction with a `GeoDistanceFilter` filter.
 
 ```fsharp
 let sortedGeoQuery =
     azureSearch {
         // Sort by furthest away from London
-        sort [ ByDistance(-0.127758, 51.507351, Descending) ]
+        sort [ ByDistance("Geo", -0.127758, 51.507351, Descending) ]
     }
 ```
 
