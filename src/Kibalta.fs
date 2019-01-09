@@ -48,6 +48,7 @@ module Filters =
             | Le -> "le"
     
     type FilterExpr =
+        | ConstantFilter of bool
         | FieldFilter of field: string * FilterComparison * value: obj
         | GeoDistanceFilter of field: string * long: float * lat: float * FilterComparison * distance: float
         | BinaryFilter of FilterExpr * FilterCombiner * FilterExpr
@@ -58,7 +59,7 @@ module Filters =
         /// ORs two filters together
         static member (*) (a, b) = BinaryFilter(a, Or, b)
     
-    let DefaultFilter = FieldFilter(null, Eq, null)
+    let DefaultFilter = ConstantFilter true
     // A helper to create a basic field filter.
     let where a comp b = FieldFilter(a, comp, b)
     // A helper to create a basic geo filter.
@@ -72,10 +73,11 @@ module Filters =
     
     let rec eval =
         function 
-        | FieldFilter(_, _, null) -> "true"
+        | ConstantFilter value -> sprintf "%b" value
         | FieldFilter(field, comparison, value) -> 
             match value with
             | :? string as s -> sprintf "%s %s '%s'" field comparison.StringValue s
+            | null -> sprintf "%s %s null" field comparison.StringValue
             | s -> sprintf "%s %s %O" field comparison.StringValue s
         | GeoDistanceFilter(field, long, lat, comparison, distance) -> 
             let lhs = sprintf "geo.distance(%s, geography'POINT(%f %f)')" field long lat

@@ -106,6 +106,21 @@ There are also some simple helpers to make create common filters easier:
 let filter = whereEq("Age", 21)
 ```
 
+You can filter based on whether values exist for a field by comparing the field to null:
+
+```fsharp
+let myQuery =
+    azureSearch {
+        filter (where "Age" Ne null)
+    }
+```
+
+This works in both directions, so if you want to find all documents that do not have a value for a certain field, you can do this:
+
+```fsharp
+let filter = whereEq("Age", null)
+``` 
+
 ### Geo distance filtering
 Azure Search supports geo distance filtering, and this is exposed in Kibalta:
 
