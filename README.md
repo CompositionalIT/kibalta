@@ -106,20 +106,20 @@ There are also some simple helpers to make create common filters easier:
 let filter = whereEq("Age", 21)
 ```
 
-### Geo filtering
-Azure Search supports geo filtering, and this is exposed in Kibalta:
+### Geo distance filtering
+Azure Search supports geo distance filtering, and this is exposed in Kibalta:
 
 ```fsharp
 let withinTenKmOfLondon =
     azureSearch {
-        filter (whereGeo (-0.127758, 51.507351) Lt 10.)
+        filter (whereGeoDistance "Geo" (-0.127758, 51.507351) Lt 10.)
     }
 ```
 
 Again, you can manually construct the filter expression if you wish:
 
 ```fsharp
-let asFilterExpr = GeoFilter (-0.127758, 51.507351, Lt, 10.)
+let asFilterExpr = GeoDistanceFilter ("Geo", -0.127758, 51.507351, Lt, 10.)
 ```
 
 ### Composing filters programmatically

@@ -49,7 +49,7 @@ module Filters =
     
     type FilterExpr =
         | FieldFilter of field: string * FilterComparison * value: obj
-        | GeoFilter of long: float * lat: float * FilterComparison * distance: float
+        | GeoDistanceFilter of field: string * long: float * lat: float * FilterComparison * distance: float
         | BinaryFilter of FilterExpr * FilterCombiner * FilterExpr
         
         /// ANDs two filters together
@@ -62,7 +62,7 @@ module Filters =
     // A helper to create a basic field filter.
     let where a comp b = FieldFilter(a, comp, b)
     // A helper to create a basic geo filter.
-    let whereGeo (long, lat) comp b = GeoFilter(long, lat, comp, b)
+    let whereGeoDistance field (long, lat) comp b = GeoDistanceFilter(field, long, lat, comp, b)
     
     /// Combines two filters by ANDing them together.
     let combine = List.fold (+) DefaultFilter
@@ -77,8 +77,8 @@ module Filters =
             match value with
             | :? string as s -> sprintf "%s %s '%s'" field comparison.StringValue s
             | s -> sprintf "%s %s %O" field comparison.StringValue s
-        | GeoFilter(long, lat, comparison, distance) -> 
-            let lhs = sprintf "geo.distance(Geo, geography'POINT(%f %f)')" long lat
+        | GeoDistanceFilter(field, long, lat, comparison, distance) -> 
+            let lhs = sprintf "geo.distance(%s, geography'POINT(%f %f)')" field long lat
             sprintf "%s %s %f" lhs comparison.StringValue distance
         | BinaryFilter(left, And, right) -> sprintf "%s and %s" (eval left) (eval right)
         | BinaryFilter(left, Or, right) -> sprintf "%s or %s" (eval left) (eval right)
