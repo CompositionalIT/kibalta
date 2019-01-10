@@ -17,12 +17,12 @@ type Direction =
 /// Specifies a type of sort to apply.
 type SortColumn =
     | ByField of field: string * Direction
-    | ByDistance of long: float * lat: float * Direction
+    | ByDistance of field: string * long: float * lat: float * Direction
     member this.StringValue =
         match this with
         | ByField(field, dir) -> sprintf "%s %s" field dir.StringValue
-        | ByDistance(long, lat, dir) -> 
-            sprintf "geo.distance(Geo, geography'POINT(%f %f)') %s" long lat dir.StringValue
+        | ByDistance(field, long, lat, dir) -> 
+            sprintf "geo.distance(%s, geography'POINT(%f %f)') %s" field long lat dir.StringValue
 
 module Filters =
     /// Combines two filters together using either AND or OR logic.
@@ -48,8 +48,9 @@ module Filters =
             | Le -> "le"
     
     type FilterExpr =
+        | ConstantFilter of bool
         | FieldFilter of field: string * FilterComparison * value: obj
-        | GeoFilter of long: float * lat: float * FilterComparison * distance: float
+        | GeoDistanceFilter of field: string * long: float * lat: float * FilterComparison * distance: float
         | BinaryFilter of FilterExpr * FilterCombiner * FilterExpr
         
         /// ANDs two filters together
@@ -58,11 +59,11 @@ module Filters =
         /// ORs two filters together
         static member (*) (a, b) = BinaryFilter(a, Or, b)
     
-    let DefaultFilter = FieldFilter(null, Eq, null)
+    let DefaultFilter = ConstantFilter true
     // A helper to create a basic field filter.
     let where a comp b = FieldFilter(a, comp, b)
     // A helper to create a basic geo filter.
-    let whereGeo (long, lat) comp b = GeoFilter(long, lat, comp, b)
+    let whereGeoDistance field (long, lat) comp b = GeoDistanceFilter(field, long, lat, comp, b)
     
     /// Combines two filters by ANDing them together.
     let combine = List.fold (+) DefaultFilter
@@ -72,13 +73,14 @@ module Filters =
     
     let rec eval =
         function 
-        | FieldFilter(_, _, null) -> "true"
+        | ConstantFilter value -> sprintf "%b" value
         | FieldFilter(field, comparison, value) -> 
             match value with
             | :? string as s -> sprintf "%s %s '%s'" field comparison.StringValue s
+            | null -> sprintf "%s %s null" field comparison.StringValue
             | s -> sprintf "%s %s %O" field comparison.StringValue s
-        | GeoFilter(long, lat, comparison, distance) -> 
-            let lhs = sprintf "geo.distance(Geo, geography'POINT(%f %f)')" long lat
+        | GeoDistanceFilter(field, long, lat, comparison, distance) -> 
+            let lhs = sprintf "geo.distance(%s, geography'POINT(%f %f)')" field long lat
             sprintf "%s %s %f" lhs comparison.StringValue distance
         | BinaryFilter(left, And, right) -> sprintf "%s and %s" (eval left) (eval right)
         | BinaryFilter(left, Or, right) -> sprintf "%s or %s" (eval left) (eval right)

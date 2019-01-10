@@ -106,20 +106,35 @@ There are also some simple helpers to make create common filters easier:
 let filter = whereEq("Age", 21)
 ```
 
-### Geo filtering
-Azure Search supports geo filtering, and this is exposed in Kibalta:
+You can filter based on whether values exist for a field by comparing the field to null:
+
+```fsharp
+let myQuery =
+    azureSearch {
+        filter (where "Age" Ne null)
+    }
+```
+
+This works in both directions, so if you want to find all documents that do not have a value for a certain field, you can do this:
+
+```fsharp
+let filter = whereEq("Age", null)
+``` 
+
+### Geo distance filtering
+Azure Search supports geo distance filtering, and this is exposed in Kibalta:
 
 ```fsharp
 let withinTenKmOfLondon =
     azureSearch {
-        filter (whereGeo (-0.127758, 51.507351) Lt 10.)
+        filter (whereGeoDistance "Geo" (-0.127758, 51.507351) Lt 10.)
     }
 ```
 
 Again, you can manually construct the filter expression if you wish:
 
 ```fsharp
-let asFilterExpr = GeoFilter (-0.127758, 51.507351, Lt, 10.)
+let asFilterExpr = GeoDistanceFilter ("Geo", -0.127758, 51.507351, Lt, 10.)
 ```
 
 ### Composing filters programmatically
@@ -161,13 +176,13 @@ let sortedQuery =
     }
 ```
 
-You can also perform sorting on geo-location distance. This sort normally is performed in conjunction with a `GeoFilter` filter.
+You can also perform sorting on geo-location distance. This sort normally is performed in conjunction with a `GeoDistanceFilter` filter.
 
 ```fsharp
 let sortedGeoQuery =
     azureSearch {
         // Sort by furthest away from London
-        sort [ ByDistance(-0.127758, 51.507351, Descending) ]
+        sort [ ByDistance("Geo", -0.127758, 51.507351, Descending) ]
     }
 ```
 
